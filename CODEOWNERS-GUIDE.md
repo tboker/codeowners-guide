@@ -23,22 +23,6 @@ A comprehensive guide to creating, managing, and enforcing code ownership across
 
 ## Overview
 
-## What CODEOWNERS Can and Cannot Do
-
-### What CODEOWNERS *Can* Do
-- Automatically request reviewers based on files and directories changed in a pull request
-- Integrate with branch protection rules or rulesets to **require** code owner approval before merge
-- Provide clear accountability for ownership of sensitive or high‑risk areas (CI, auth, payments, infra)
-- Scale review governance across monorepos and large organizations
-
-### What CODEOWNERS *Cannot* Do (Common Misconceptions)
-- **It does not restrict file visibility** — anyone with read access can view all files in the repository
-- **It does not provide file‑level access control or ACLs**
-- **It does not block merges by itself** — enforcement requires branch protection or rulesets
-- **It does not support reliable negation/exclusion patterns** like `.gitignore` (`!pattern`)
-
-> If you need to restrict who can *see* files, use separate repositories, private submodules, encryption (e.g., SOPS/git‑crypt), or a secrets manager. CODEOWNERS is a governance and review‑routing mechanism only.
-
 ### What is CODEOWNERS?
 
 The `CODEOWNERS` file is a configuration file that defines individuals or teams responsible for code in a repository. When a pull request modifies files that match patterns in the CODEOWNERS file, the designated owners are automatically requested as reviewers.
@@ -57,7 +41,7 @@ The `CODEOWNERS` file is a configuration file that defines individuals or teams 
 ### Plan Requirements
 
 | Feature | GitHub Free | GitHub Pro | GitHub Team | GitHub Enterprise Cloud | GitHub Enterprise Server |
-|---------|:-------------:|:------------:|:-------------:|:------------------------:|:-------------------------:|
+|---------|-------------|------------|-------------|------------------------|-------------------------|
 | CODEOWNERS (Public Repos) | ✅ | ✅ | ✅ | ✅ | ✅ |
 | CODEOWNERS (Private Repos) | ❌ | ✅ | ✅ | ✅ | ✅ |
 | Required Reviews from Code Owners | ❌ | ✅ | ✅ | ✅ | ✅ |
@@ -122,13 +106,10 @@ Each CODEOWNERS file applies only to the branch where it resides. This allows di
 
 ### Comment Syntax
 
-**Note on Inline Comments**: While examples may show inline comments, best practice is to use
-**full‑line comments only**. Inline trailing comments can be confusing and may behave inconsistently across tooling.
-
 ```gitignore
 # This is a standalone comment
 
-*.js @js-team
+*.js @js-team  # This is an inline comment
 ```
 
 ### Multiple Owners
@@ -532,29 +513,6 @@ Add context with comments:
 - **Review periodically** to remove obsolete entries and update team references
 
 ---
-
-## Validation and Automation
-
-### UI Validation
-- GitHub highlights CODEOWNERS syntax errors directly in the web UI
-- Invalid lines may be skipped silently at runtime — always validate after changes
-
-### API‑Based Validation (Recommended)
-Use the REST API to detect CODEOWNERS errors and enforce correctness via CI:
-
-```
-GET /repos/{owner}/{repo}/codeowners/errors
-```
-
-**Recommended CI Guardrail**
-- Trigger a workflow when `.github/CODEOWNERS` changes
-- Call the CODEOWNERS errors endpoint
-- Fail the check if any errors are returned
-- Require this check via branch protection or rulesets
-
-### Why This Matters
-- Prevents broken ownership rules from silently disabling review requirements
-- Ensures organization‑wide standards remain enforceable at scale
 
 ## Troubleshooting
 
