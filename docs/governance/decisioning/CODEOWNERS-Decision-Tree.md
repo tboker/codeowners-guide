@@ -1,4 +1,4 @@
-# CODEOWNERS Decision Tree – Selecting the Right Governance Model
+# CODEOWNERS Decision Tree – Selecting the Right Governance Model 
 
 This document helps enterprises choose the correct CODEOWNERS and enforcement model based on repository type, risk profile, and platform (GHES vs GHEC).
 
