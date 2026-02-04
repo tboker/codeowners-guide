@@ -8,12 +8,12 @@ A comprehensive enterprise guide to understanding, creating, managing, and enfor
 
 | Document | Description | Primary Audience |
 |----------|-------------|------------------|
-| [Quick Start Guide](docs/00-Quick-Start.md) | Executive summary and getting started | All audiences |
-| [Complete Reference](docs/01-Complete-Reference.md) | Full syntax, patterns, and examples | Developers, Platform teams |
-| [GHEC Guide](docs/02-GHEC-Guide.md) | GitHub Enterprise Cloud specifics | GHEC administrators |
-| [GHES Guide](docs/03-GHES-Guide.md) | GitHub Enterprise Server specifics | GHES administrators |
-| [Governance & Enforcement](docs/04-Governance-and-Enforcement.md) | Decision frameworks, rulesets, migration | Platform governance teams |
-| [Operations & Validation](docs/05-Operations-and-Validation.md) | CI/CD, troubleshooting, API reference | DevOps, SRE teams |
+| [Quick Start Guide](docs/Quick-Start.md) | Executive summary and getting started | All audiences |
+| [Complete Reference](docs/Complete-Reference.md) | Full syntax, patterns, and examples | Developers, Platform teams |
+| [GHEC Guide](docs/GHEC-Guide.md) | GitHub Enterprise Cloud specifics | GHEC administrators |
+| [GHES Guide](docs/GHES-Guide.md) | GitHub Enterprise Server specifics | GHES administrators |
+| [Governance & Enforcement](docs/Governance-and-Enforcement.md) | Decision frameworks, rulesets, migration | Platform governance teams |
+| [Operations & Validation](docs/Operations-and-Validation.md) | CI/CD, troubleshooting, API reference | DevOps, SRE teams |
 
 ---
 
