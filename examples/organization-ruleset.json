@@ -1,0 +1,167 @@
+{
+  "_comment": "GitHub Organization Ruleset Example",
+  "_documentation": "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets",
+  "_notes": [
+    "Organization rulesets apply across repositories within a single organization",
+    "Available in GHEC and GHES 3.12+",
+    "Configure via Organization → Settings → Rules → Rulesets"
+  ],
+
+  "name": "org-codeowner-standard",
+  "description": "Organization-wide code owner enforcement for service repositories",
+  
+  "enforcement": "active",
+  "_enforcement_options": ["active", "evaluate", "disabled"],
+  
+  "target": "branch",
+  
+  "conditions": {
+    "ref_name": {
+      "include": [
+        "~DEFAULT_BRANCH",
+        "refs/heads/release/*"
+      ],
+      "exclude": []
+    },
+    "repository_name": {
+      "include": [
+        "*-service",
+        "*-api",
+        "*-worker"
+      ],
+      "exclude": [
+        "*-mock-*"
+      ]
+    }
+  },
+
+  "rules": [
+    {
+      "type": "pull_request",
+      "parameters": {
+        "required_approving_review_count": 2,
+        "require_code_owner_review": true,
+        "dismiss_stale_reviews_on_push": true,
+        "require_last_push_approval": true,
+        "required_review_thread_resolution": true
+      }
+    },
+    {
+      "type": "required_status_checks",
+      "parameters": {
+        "required_status_checks": [
+          {
+            "context": "ci/build"
+          },
+          {
+            "context": "ci/test"
+          },
+          {
+            "context": "security/scan"
+          }
+        ],
+        "strict_required_status_checks_policy": true
+      }
+    },
+    {
+      "type": "non_fast_forward"
+    }
+  ],
+
+  "bypass_actors": [
+    {
+      "_description": "Organization admin team for emergencies",
+      "actor_id": 11111,
+      "actor_type": "Team",
+      "bypass_mode": "always"
+    },
+    {
+      "_description": "Release automation bot",
+      "actor_id": 22222,
+      "actor_type": "Integration",
+      "bypass_mode": "pull_request"
+    },
+    {
+      "_description": "Repository maintainers for hotfixes",
+      "actor_id": 4,
+      "actor_type": "RepositoryRole",
+      "_actor_type_note": "RepositoryRole IDs: 1=Read, 2=Triage, 3=Write, 4=Maintain, 5=Admin",
+      "bypass_mode": "pull_request"
+    }
+  ],
+
+  "_additional_ruleset_examples": [
+    {
+      "name": "org-infrastructure-strict",
+      "description": "Stricter rules for infrastructure repositories",
+      "conditions": {
+        "repository_name": {
+          "include": ["terraform-*", "k8s-*", "infra-*"]
+        }
+      },
+      "rules": [
+        {
+          "type": "pull_request",
+          "parameters": {
+            "required_approving_review_count": 2,
+            "require_code_owner_review": true,
+            "dismiss_stale_reviews_on_push": true,
+            "require_last_push_approval": true
+          }
+        }
+      ],
+      "bypass_actors": [
+        {
+          "_description": "Only emergency team can bypass - no regular bypass",
+          "actor_type": "Team",
+          "actor_name": "emergency-admins",
+          "bypass_mode": "always"
+        }
+      ]
+    },
+    {
+      "name": "org-documentation-light",
+      "description": "Lighter rules for documentation repositories",
+      "conditions": {
+        "repository_name": {
+          "include": ["*-docs", "docs-*", "wiki-*"]
+        }
+      },
+      "rules": [
+        {
+          "type": "pull_request",
+          "parameters": {
+            "required_approving_review_count": 1,
+            "require_code_owner_review": true,
+            "dismiss_stale_reviews_on_push": false,
+            "require_last_push_approval": false
+          }
+        }
+      ]
+    }
+  ],
+
+  "_api_examples": {
+    "create_ruleset": {
+      "method": "POST",
+      "endpoint": "/orgs/{org}/rulesets",
+      "body": "{ ... ruleset configuration ... }"
+    },
+    "list_rulesets": {
+      "method": "GET",
+      "endpoint": "/orgs/{org}/rulesets"
+    },
+    "get_ruleset": {
+      "method": "GET",
+      "endpoint": "/orgs/{org}/rulesets/{ruleset_id}"
+    },
+    "update_ruleset": {
+      "method": "PUT",
+      "endpoint": "/orgs/{org}/rulesets/{ruleset_id}"
+    },
+    "delete_ruleset": {
+      "method": "DELETE",
+      "endpoint": "/orgs/{org}/rulesets/{ruleset_id}"
+    }
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "_comment": "GitHub Enterprise Cloud - Enterprise Ruleset Example",
+  "_documentation": "https://docs.github.com/en/enterprise-cloud@latest/organizations/managing-organization-settings/managing-rulesets-for-repositories-in-your-organization",
+  "_notes": [
+    "This is a conceptual example for documentation purposes",
+    "Actual rulesets are configured via GitHub UI or API",
+    "Enterprise rulesets apply across ALL organizations in the enterprise"
+  ],
+
+  "name": "enterprise-codeowner-baseline",
+  "description": "Enterprise-wide baseline requiring code owner approval for all production branches",
+  
+  "enforcement": "active",
+  "_enforcement_options": ["active", "evaluate", "disabled"],
+  
+  "target": "branch",
+  "_target_options": ["branch", "tag"],
+  
+  "conditions": {
+    "ref_name": {
+      "include": [
+        "~DEFAULT_BRANCH",
+        "refs/heads/main",
+        "refs/heads/master",
+        "refs/heads/release/*",
+        "refs/heads/hotfix/*"
+      ],
+      "exclude": [
+        "refs/heads/feature/*",
+        "refs/heads/dev/*",
+        "refs/heads/experiment/*"
+      ]
+    },
+    "repository_name": {
+      "include": ["*"],
+      "exclude": [
+        "*-sandbox",
+        "*-poc",
+        "*-experiment",
+        "*-test"
+      ]
+    },
+    "repository_property": [
+      {
+        "name": "environment",
+        "property_values": ["production", "staging"]
+      }
+    ]
+  },
+
+  "rules": [
+    {
+      "type": "pull_request",
+      "parameters": {
+        "required_approving_review_count": 1,
+        "require_code_owner_review": true,
+        "dismiss_stale_reviews_on_push": true,
+        "require_last_push_approval": false,
+        "required_review_thread_resolution": false
+      }
+    },
+    {
+      "type": "required_linear_history"
+    },
+    {
+      "type": "non_fast_forward"
+    }
+  ],
+
+  "bypass_actors": [
+    {
+      "_description": "Enterprise emergency response team",
+      "actor_id": 12345,
+      "actor_type": "Team",
+      "bypass_mode": "always"
+    },
+    {
+      "_description": "CI/CD automation",
+      "actor_id": 67890,
+      "actor_type": "Integration",
+      "bypass_mode": "pull_request"
+    }
+  ],
+
+  "_example_api_create": {
+    "method": "POST",
+    "endpoint": "/enterprises/{enterprise}/rulesets",
+    "note": "Enterprise rulesets require GitHub Enterprise Cloud with enterprise admin permissions"
+  },
+
+  "_related_rulesets": [
+    {
+      "name": "enterprise-high-risk-enforcement",
+      "description": "Stricter rules for repositories tagged as high-risk",
+      "additional_rules": {
+        "required_approving_review_count": 2,
+        "require_last_push_approval": true
+      }
+    }
+  ]
+}

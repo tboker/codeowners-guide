@@ -1,0 +1,252 @@
+# =============================================================================
+# CODEOWNERS Validation Workflow
+# =============================================================================
+#
+# This workflow validates CODEOWNERS files to prevent silent failures.
+#
+# Features:
+# - Validates CODEOWNERS syntax via GitHub API
+# - Checks for common issues (individual users, ordering)
+# - Reports errors as GitHub annotations
+# - Runs on CODEOWNERS changes and scheduled checks
+#
+# Usage:
+# 1. Copy this file to .github/workflows/codeowners-validation.yml
+# 2. For GHES: Update the API URL (see GHES section below)
+# 3. Commit and push
+#
+# =============================================================================
+
+name: Validate CODEOWNERS
+
+on:
+  # Validate on pull requests that modify CODEOWNERS
+  pull_request:
+    paths:
+      - '.github/CODEOWNERS'
+      - 'CODEOWNERS'
+      - 'docs/CODEOWNERS'
+  
+  # Validate on push to default branch
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - '.github/CODEOWNERS'
+      - 'CODEOWNERS'
+      - 'docs/CODEOWNERS'
+  
+  # Scheduled weekly check
+  schedule:
+    - cron: '0 9 * * 1'  # Every Monday at 9 AM UTC
+  
+  # Manual trigger
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  validate-codeowners:
+    name: Validate CODEOWNERS
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # =========================================================================
+      # STEP 1: API Validation
+      # =========================================================================
+      - name: Validate CODEOWNERS via API
+        id: api-validation
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # For GHES: Uncomment and set your hostname
+          # GITHUB_API_URL: https://YOUR-GHES-HOSTNAME/api/v3
+        run: |
+          echo "🔍 Checking CODEOWNERS for errors via GitHub API..."
+          
+          # Determine API URL (GHES or GitHub.com)
+          API_BASE="${GITHUB_API_URL:-https://api.github.com}"
+          
+          # Call the CODEOWNERS errors API
+          response=$(curl -s -w "\n%{http_code}" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "${API_BASE}/repos/${{ github.repository }}/codeowners/errors")
+          
+          # Extract HTTP status code and body
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+          
+          # Check for API errors
+          if [ "$http_code" != "200" ]; then
+            echo "::error::GitHub API request failed with status $http_code"
+            echo "Response: $body"
+            exit 1
+          fi
+          
+          # Parse error count
+          error_count=$(echo "$body" | jq '.errors | length')
+          
+          if [ "$error_count" -gt 0 ]; then
+            echo "::error::Found $error_count CODEOWNERS error(s)"
+            echo ""
+            echo "## ❌ CODEOWNERS Errors Found" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Line | Error | Source |" >> $GITHUB_STEP_SUMMARY
+            echo "|------|-------|--------|" >> $GITHUB_STEP_SUMMARY
+            
+            # Output each error
+            echo "$body" | jq -r '.errors[] | "| \(.line) | \(.message) | `\(.source)` |"' >> $GITHUB_STEP_SUMMARY
+            
+            # Create GitHub annotations for each error
+            echo "$body" | jq -r '.errors[] | "::error file=\(.path),line=\(.line),col=\(.column // 1)::\(.message): \(.source)"'
+            
+            echo "has_errors=true" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          
+          echo "✅ CODEOWNERS API validation passed - no errors found"
+          echo "## ✅ CODEOWNERS Validation Passed" >> $GITHUB_STEP_SUMMARY
+          echo "has_errors=false" >> $GITHUB_OUTPUT
+
+      # =========================================================================
+      # STEP 2: Best Practices Check
+      # =========================================================================
+      - name: Check for best practice violations
+        if: always()
+        run: |
+          echo "🔍 Checking CODEOWNERS for best practice issues..."
+          
+          # Find CODEOWNERS file
+          CODEOWNERS_FILE=""
+          for f in .github/CODEOWNERS CODEOWNERS docs/CODEOWNERS; do
+            if [ -f "$f" ]; then
+              CODEOWNERS_FILE="$f"
+              break
+            fi
+          done
+          
+          if [ -z "$CODEOWNERS_FILE" ]; then
+            echo "::warning::No CODEOWNERS file found in repository"
+            exit 0
+          fi
+          
+          echo "Found CODEOWNERS at: $CODEOWNERS_FILE"
+          
+          WARNINGS=0
+          
+          # Check for individual users (not teams)
+          # Pattern: @ followed by username without /
+          if grep -E '^\s*[^#].*\s+@[a-zA-Z0-9_-]+(\s|$)' "$CODEOWNERS_FILE" | grep -v '@[a-zA-Z0-9_-]*/' > /dev/null 2>&1; then
+            echo "::warning::Found individual users in CODEOWNERS. Consider using teams instead for resilience."
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### ⚠️ Best Practice Warnings" >> $GITHUB_STEP_SUMMARY
+            echo "- Individual users found in CODEOWNERS. Teams are recommended for better resilience." >> $GITHUB_STEP_SUMMARY
+            WARNINGS=$((WARNINGS + 1))
+          fi
+          
+          # Check for potential duplicate patterns
+          patterns=$(grep -v '^\s*#' "$CODEOWNERS_FILE" | grep -v '^\s*$' | awk '{print $1}' | sort)
+          duplicates=$(echo "$patterns" | uniq -d)
+          if [ -n "$duplicates" ]; then
+            echo "::warning::Duplicate patterns found in CODEOWNERS. Only the last occurrence will be used."
+            echo "Duplicates: $duplicates"
+            WARNINGS=$((WARNINGS + 1))
+          fi
+          
+          # Check file has default owner
+          if ! grep -E '^\s*\*\s+@' "$CODEOWNERS_FILE" > /dev/null 2>&1; then
+            echo "::notice::No default owner (*) defined. Consider adding a fallback owner."
+          fi
+          
+          if [ $WARNINGS -eq 0 ]; then
+            echo "✅ No best practice issues found"
+          else
+            echo "⚠️ Found $WARNINGS best practice warning(s)"
+          fi
+
+      # =========================================================================
+      # STEP 3: Pattern Coverage Report (Optional)
+      # =========================================================================
+      - name: Generate coverage report
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "📊 Generating CODEOWNERS coverage summary..."
+          
+          CODEOWNERS_FILE=""
+          for f in .github/CODEOWNERS CODEOWNERS docs/CODEOWNERS; do
+            if [ -f "$f" ]; then
+              CODEOWNERS_FILE="$f"
+              break
+            fi
+          done
+          
+          if [ -z "$CODEOWNERS_FILE" ]; then
+            exit 0
+          fi
+          
+          # Count patterns and owners
+          total_lines=$(wc -l < "$CODEOWNERS_FILE")
+          pattern_lines=$(grep -v '^\s*#' "$CODEOWNERS_FILE" | grep -v '^\s*$' | wc -l)
+          unique_teams=$(grep -oE '@[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+' "$CODEOWNERS_FILE" | sort -u | wc -l)
+          unique_users=$(grep -oE '@[a-zA-Z0-9_-]+' "$CODEOWNERS_FILE" | grep -v '/' | sort -u | wc -l)
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 CODEOWNERS Statistics" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Total lines | $total_lines |" >> $GITHUB_STEP_SUMMARY
+          echo "| Pattern rules | $pattern_lines |" >> $GITHUB_STEP_SUMMARY
+          echo "| Unique teams | $unique_teams |" >> $GITHUB_STEP_SUMMARY
+          echo "| Individual users | $unique_users |" >> $GITHUB_STEP_SUMMARY
+
+# =============================================================================
+# GHES Configuration
+# =============================================================================
+# 
+# For GitHub Enterprise Server, you need to:
+# 
+# 1. Set the GITHUB_API_URL environment variable:
+#    - Option A: Set as repository/organization variable
+#    - Option B: Uncomment the env line in the validation step
+# 
+# 2. Update runners if using self-hosted:
+#    runs-on: self-hosted
+# 
+# Example for GHES:
+# 
+#   - name: Validate CODEOWNERS via API
+#     env:
+#       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#       GITHUB_API_URL: https://github.mycompany.com/api/v3
+#     run: |
+#       ...
+#
+# =============================================================================
+
+# =============================================================================
+# Customization Options
+# =============================================================================
+#
+# 1. Add required status check:
+#    Settings → Branches → Add rule → Require status checks
+#    Select "Validate CODEOWNERS"
+#
+# 2. Add to organization ruleset:
+#    Organization → Settings → Rules → Rulesets
+#    Add required status check for this workflow
+#
+# 3. Customize schedule:
+#    Change the cron expression in the schedule trigger
+#
+# 4. Add Slack/Teams notification:
+#    Add a notification step after validation
+#
+# =============================================================================

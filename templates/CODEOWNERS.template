@@ -1,0 +1,224 @@
+# =============================================================================
+# CODEOWNERS - [Repository Name]
+# =============================================================================
+#
+# This file defines code ownership for automatic review requests.
+# Documentation: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# IMPORTANT:
+# - Order matters! Later patterns override earlier patterns.
+# - All code owners must have WRITE access to this repository.
+# - Teams must be visible and have explicit write permissions.
+#
+# Last updated: [DATE]
+# Maintained by: @[ORG]/repository-admins
+#
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# DEFAULT OWNERS
+# -----------------------------------------------------------------------------
+# Fallback owners for any file not explicitly matched below.
+# These reviewers ensure no PR goes unreviewed.
+
+*                                       @[ORG]/engineering-leads
+
+# -----------------------------------------------------------------------------
+# REPOSITORY CONFIGURATION & GOVERNANCE
+# -----------------------------------------------------------------------------
+# Critical files that control repository behavior and CI/CD.
+# Changes here affect all developers and pipelines.
+
+/.github/                               @[ORG]/platform-team
+/.github/workflows/                     @[ORG]/devops-team @[ORG]/security-team
+/.github/CODEOWNERS                     @[ORG]/repository-admins
+/.github/SECURITY.md                    @[ORG]/security-team
+/.github/dependabot.yml                 @[ORG]/security-team
+
+# -----------------------------------------------------------------------------
+# DOCUMENTATION
+# -----------------------------------------------------------------------------
+# Technical documentation, guides, and API references.
+
+/docs/                                  @[ORG]/technical-writers
+/docs/api/                              @[ORG]/api-team @[ORG]/technical-writers
+*.md                                    @[ORG]/technical-writers
+README.md                               @[ORG]/technical-writers @[ORG]/engineering-leads
+CONTRIBUTING.md                         @[ORG]/technical-writers @[ORG]/engineering-leads
+CHANGELOG.md                            @[ORG]/release-managers
+
+# -----------------------------------------------------------------------------
+# SOURCE CODE - TOP LEVEL
+# -----------------------------------------------------------------------------
+# Main source directories - adjust based on your project structure.
+
+/src/                                   @[ORG]/engineering-team
+/lib/                                   @[ORG]/engineering-team
+/app/                                   @[ORG]/engineering-team
+
+# -----------------------------------------------------------------------------
+# SOURCE CODE - DOMAIN AREAS
+# -----------------------------------------------------------------------------
+# Adjust these sections based on your codebase structure.
+
+# Backend Services
+/src/api/                               @[ORG]/backend-team
+/src/services/                          @[ORG]/backend-team
+/src/workers/                           @[ORG]/backend-team
+
+# Frontend Applications
+/src/web/                               @[ORG]/frontend-team
+/src/mobile/                            @[ORG]/mobile-team
+/src/components/                        @[ORG]/frontend-team @[ORG]/design-system-team
+
+# Shared Libraries
+/src/shared/                            @[ORG]/architecture-team
+/src/utils/                             @[ORG]/engineering-team
+/src/common/                            @[ORG]/engineering-team
+
+# -----------------------------------------------------------------------------
+# SOURCE CODE - SENSITIVE AREAS
+# -----------------------------------------------------------------------------
+# These areas require additional review from security team.
+
+# Authentication & Authorization
+/src/api/auth/                          @[ORG]/identity-team @[ORG]/security-team
+/src/api/oauth/                         @[ORG]/identity-team @[ORG]/security-team
+/src/middleware/auth/                   @[ORG]/identity-team
+
+# Payment Processing
+/src/api/payments/                      @[ORG]/payments-team @[ORG]/security-team
+/src/api/billing/                       @[ORG]/payments-team
+/src/services/stripe/                   @[ORG]/payments-team
+
+# Data & Privacy
+/src/api/user-data/                     @[ORG]/privacy-team @[ORG]/security-team
+/src/services/gdpr/                     @[ORG]/privacy-team @[ORG]/legal-team
+
+# -----------------------------------------------------------------------------
+# INFRASTRUCTURE & DEPLOYMENT
+# -----------------------------------------------------------------------------
+# Infrastructure as Code and deployment configurations.
+
+/infrastructure/                        @[ORG]/platform-team
+/infrastructure/terraform/              @[ORG]/terraform-team
+/infrastructure/kubernetes/             @[ORG]/k8s-team
+/infrastructure/helm/                   @[ORG]/k8s-team
+/deploy/                                @[ORG]/devops-team
+
+# Container Configuration
+Dockerfile                              @[ORG]/container-team
+docker-compose*.yml                     @[ORG]/container-team
+.dockerignore                           @[ORG]/container-team
+
+# -----------------------------------------------------------------------------
+# DATABASE & MIGRATIONS
+# -----------------------------------------------------------------------------
+# Database schema changes and migrations require careful review.
+
+/migrations/                            @[ORG]/database-team
+/src/db/                                @[ORG]/database-team
+*.sql                                   @[ORG]/database-team
+/prisma/                                @[ORG]/database-team
+
+# -----------------------------------------------------------------------------
+# TESTING
+# -----------------------------------------------------------------------------
+# Test files and configuration.
+
+/tests/                                 @[ORG]/qa-team
+/test/                                  @[ORG]/qa-team
+/__tests__/                             @[ORG]/qa-team
+/tests/e2e/                             @[ORG]/qa-team @[ORG]/frontend-team
+/tests/integration/                     @[ORG]/qa-team @[ORG]/backend-team
+/tests/security/                        @[ORG]/security-team
+*.test.js                               @[ORG]/qa-team
+*.test.ts                               @[ORG]/qa-team
+*.spec.js                               @[ORG]/qa-team
+*.spec.ts                               @[ORG]/qa-team
+jest.config.*                           @[ORG]/qa-team
+cypress.config.*                        @[ORG]/qa-team
+
+# -----------------------------------------------------------------------------
+# DEPENDENCY & BUILD CONFIGURATION
+# -----------------------------------------------------------------------------
+# Changes to dependencies affect everyone - review carefully.
+
+# Node.js / JavaScript
+package.json                            @[ORG]/dependency-managers
+package-lock.json                       @[ORG]/dependency-managers
+yarn.lock                               @[ORG]/dependency-managers
+pnpm-lock.yaml                          @[ORG]/dependency-managers
+.npmrc                                  @[ORG]/dependency-managers
+
+# Python
+requirements*.txt                       @[ORG]/dependency-managers @[ORG]/python-team
+Pipfile*                                @[ORG]/dependency-managers @[ORG]/python-team
+pyproject.toml                          @[ORG]/dependency-managers @[ORG]/python-team
+poetry.lock                             @[ORG]/dependency-managers @[ORG]/python-team
+
+# Go
+go.mod                                  @[ORG]/dependency-managers @[ORG]/go-team
+go.sum                                  @[ORG]/dependency-managers @[ORG]/go-team
+
+# Java / Kotlin
+pom.xml                                 @[ORG]/dependency-managers
+build.gradle                            @[ORG]/dependency-managers
+build.gradle.kts                        @[ORG]/dependency-managers
+
+# .NET
+*.csproj                                @[ORG]/dependency-managers
+*.sln                                   @[ORG]/dependency-managers
+packages.config                         @[ORG]/dependency-managers
+
+# Build & Bundler Configuration
+webpack.config.*                        @[ORG]/frontend-team
+vite.config.*                           @[ORG]/frontend-team
+rollup.config.*                         @[ORG]/frontend-team
+tsconfig*.json                          @[ORG]/architecture-team
+babel.config.*                          @[ORG]/frontend-team
+Makefile                                @[ORG]/devops-team
+
+# -----------------------------------------------------------------------------
+# SECURITY-SENSITIVE PATTERNS
+# -----------------------------------------------------------------------------
+# Any secrets or credential references (should not exist, but catch if they do).
+
+**/secrets/                             @[ORG]/security-team
+**/credentials/                         @[ORG]/security-team
+*.pem                                   @[ORG]/security-team
+*.key                                   @[ORG]/security-team
+*.p12                                   @[ORG]/security-team
+*.pfx                                   @[ORG]/security-team
+
+# Security policies and scanning configuration
+.snyk                                   @[ORG]/security-team
+.trivyignore                            @[ORG]/security-team
+sonar-project.properties                @[ORG]/security-team
+.gitleaks.toml                          @[ORG]/security-team
+
+# -----------------------------------------------------------------------------
+# LEGAL & COMPLIANCE
+# -----------------------------------------------------------------------------
+# Legal documents and compliance-related files.
+
+LICENSE*                                @[ORG]/legal-team
+NOTICE*                                 @[ORG]/legal-team
+/legal/                                 @[ORG]/legal-team
+/compliance/                            @[ORG]/compliance-team @[ORG]/security-team
+PATENTS                                 @[ORG]/legal-team
+
+# =============================================================================
+# CUSTOMIZATION INSTRUCTIONS
+# =============================================================================
+#
+# 1. Replace [ORG] with your organization name
+# 2. Replace [DATE] with the current date
+# 3. Remove sections that don't apply to your project
+# 4. Add sections for your specific domain areas
+# 5. Ensure all referenced teams exist and have write access
+# 6. Validate using: gh api /repos/OWNER/REPO/codeowners/errors
+#
+# =============================================================================
+# END OF CODEOWNERS
+# =============================================================================
