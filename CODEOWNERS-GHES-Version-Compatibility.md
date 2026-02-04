@@ -13,7 +13,7 @@ Always verify features against your deployed GHES version.
 ## Feature Availability Considerations
 
 | Feature | Early GHES | Modern GHES |
-|-------|-----------|-------------|
+|-------|:-----------:|:-------------:|
 | CODEOWNERS | Yes | Yes |
 | Branch protection | Yes | Yes |
 | Repository rulesets | No / Limited | Yes |
