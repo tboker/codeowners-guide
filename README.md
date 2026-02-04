@@ -66,12 +66,12 @@ The `CODEOWNERS` file is a configuration file that defines individuals or teams 
 codeowners-docs/
 ├── README.md                              ← You are here
 ├── docs/
-│   ├── 00-Quick-Start.md                  ← Start here for overview
-│   ├── 01-Complete-Reference.md           ← Comprehensive syntax guide
-│   ├── 02-GHEC-Guide.md                   ← GitHub Enterprise Cloud
-│   ├── 03-GHES-Guide.md                   ← GitHub Enterprise Server
-│   ├── 04-Governance-and-Enforcement.md   ← Policy and rulesets
-│   └── 05-Operations-and-Validation.md    ← CI/CD and troubleshooting
+│   ├── Quick-Start.md                  ← Start here for overview
+│   ├── Complete-Reference.md           ← Comprehensive syntax guide
+│   ├── GHEC-Guide.md                   ← GitHub Enterprise Cloud
+│   ├── GHES-Guide.md                   ← GitHub Enterprise Server
+│   ├── Governance-and-Enforcement.md   ← Policy and rulesets
+│   └── Operations-and-Validation.md    ← CI/CD and troubleshooting
 ├── templates/
 │   └── CODEOWNERS.template                ← Copy this to start
 └── examples/
@@ -90,15 +90,15 @@ codeowners-docs/
 
 ### For Platform Teams Implementing CODEOWNERS
 
-1. [Quick Start Guide](docs/00-Quick-Start.md)
-2. [Complete Reference](docs/01-Complete-Reference.md)
-3. Platform-specific guide: [GHEC](docs/02-GHEC-Guide.md) or [GHES](docs/03-GHES-Guide.md)
-4. [Governance & Enforcement](docs/04-Governance-and-Enforcement.md)
+1. [Quick Start Guide](docs/Quick-Start.md)
+2. [Complete Reference](docs/Complete-Reference.md)
+3. Platform-specific guide: [GHEC](docs/GHEC-Guide.md) or [GHES](docs/GHES-Guide.md)
+4. [Governance & Enforcement](docs/Governance-and-Enforcement.md)
 
 ### For Developers Using CODEOWNERS
 
-1. [Quick Start Guide](docs/00-Quick-Start.md)
-2. [Complete Reference](docs/01-Complete-Reference.md)
+1. [Quick Start Guide](docs/Quick-Start.md)
+2. [Complete Reference](docs/Complete-Reference.md)
 
 ### For DevOps/SRE Teams
 
