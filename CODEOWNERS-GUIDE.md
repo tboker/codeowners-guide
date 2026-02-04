@@ -1,4 +1,4 @@
-# GitHub CODEOWNERS Complete Reference Guide
+# GitHub CODEOWNERS Complete Reference Guide 
 
 A comprehensive guide to creating, managing, and enforcing code ownership across GitHub Enterprise, Organizations, Repositories, Directories, and Files.
 
