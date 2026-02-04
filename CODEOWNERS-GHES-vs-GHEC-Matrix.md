@@ -8,7 +8,7 @@ across GitHub Enterprise Server (GHES) and GitHub Enterprise Cloud (GHEC).
 ## Feature Comparison
 
 | Capability | GHES | GHEC |
-|-----------|------|------|
+|-----------|:------:|:------:|
 | CODEOWNERS support | Yes | Yes |
 | Branch protection | Yes | Yes |
 | Repository rulesets | Version-dependent | Yes |
